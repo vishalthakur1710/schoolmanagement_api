@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
-
-from app.database import engine, Base, get_db
+from app.database import engine, get_db
+from app.model import Base
 from app.router import auth, admin, students, teachers, notifications
 
 import asyncio

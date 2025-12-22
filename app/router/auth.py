@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.database import get_db
 from app import crud, schemas, model
-
+from app.crud import pwd_context
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -26,7 +26,7 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 def create_access_token(data: dict, expires_delta: int = None):

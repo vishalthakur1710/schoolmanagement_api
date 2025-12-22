@@ -6,8 +6,10 @@ from datetime import date, datetime
 
 from app import model, schemas
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+pwd_context = CryptContext(
+    schemes=["argon2"],
+    deprecated="auto",
+)
 # =========================================================
 # AUTH HELPERS
 # =========================================================

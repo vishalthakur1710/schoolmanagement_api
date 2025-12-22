@@ -2,7 +2,8 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
-
+from app.model import Base as ModelBase
+Base = ModelBase
 # ---------------------------------------------------------
 # LOAD ENV
 # ---------------------------------------------------------
