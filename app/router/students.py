@@ -65,3 +65,13 @@ async def get_my_notifications(
     db: AsyncSession = Depends(get_db)
 ):
     return await crud.get_notifications_for_user(db, user)
+
+# =========================================================
+# GET STUDENT SUMMARY
+# =========================================================
+@router.get("/summary")
+async def get_my_summary(
+    user: model.User = Depends(student_required),
+    db: AsyncSession = Depends(get_db)
+):
+    return await crud.get_student_summary(db, user)

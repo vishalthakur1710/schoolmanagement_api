@@ -5,7 +5,7 @@ description = "school_app"
 authors = [
     {name = "vishal@school.com"}
 ]
-readme = "README.md"
+
 requires-python = ">=3.12"
 dependencies = [
     "pandas (>=2.3.3,<3.0.0)",

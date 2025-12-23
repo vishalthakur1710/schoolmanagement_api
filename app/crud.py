@@ -3,7 +3,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from passlib.context import CryptContext
 from datetime import date, datetime
-
+import asyncio
 from app import model, schemas
 
 pwd_context = CryptContext(
@@ -83,6 +83,32 @@ async def get_students_by_class(db: AsyncSession, class_id: int):
         select(model.Student).where(model.Student.class_id == class_id)
     )
     return result.scalars().all()
+
+
+
+async def get_student_summary(db: AsyncSession, user: model.User):
+    """
+    Return profile, marks, attendance, behavior and notifications for a student.
+    """
+    student_id = user.student_profile.id
+
+    profile_task = get_student(db, student_id)
+    marks_task = get_student_marks(db, student_id)
+    attendance_task = get_attendance(db, student_id)
+    behavior_task = get_behavior(db, student_id)
+    notifications_task = get_notifications_for_user(db, user)
+
+    profile, marks, attendance, behavior, notifications = await asyncio.gather(
+        profile_task, marks_task, attendance_task, behavior_task, notifications_task
+    )
+
+    return {
+        "profile": profile,
+        "marks": marks,
+        "attendance": attendance,
+        "behavior": behavior,
+        "notifications": notifications,
+    }
 
 
 # =========================================================
