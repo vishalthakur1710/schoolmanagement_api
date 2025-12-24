@@ -1,18 +1,31 @@
 import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-from app.model import Base as ModelBase
-Base = ModelBase
-# ---------------------------------------------------------
-# LOAD ENV
-# ---------------------------------------------------------
-load_dotenv()
 
+# ---------------------------------------------------------
+# LOAD CORRECT ENV FILE
+# ---------------------------------------------------------
+ENV = os.getenv("ENV", "local")
+
+if ENV == "docker":
+    load_dotenv(".env.docker")
+else:
+    load_dotenv(".env")
+
+# ---------------------------------------------------------
+# DATABASE URL
+# ---------------------------------------------------------
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
-    raise ValueError("❌ DATABASE_URL is missing! Check your .env file.")
+    raise RuntimeError("❌ DATABASE_URL is missing! Check your env file.")
+
+# ---------------------------------------------------------
+# SQLALCHEMY BASE (models)
+# ---------------------------------------------------------
+from app.model import Base as ModelBase
+Base = ModelBase
 
 # ---------------------------------------------------------
 # ENGINE + SESSION
@@ -20,7 +33,7 @@ if not DATABASE_URL:
 engine = create_async_engine(
     DATABASE_URL,
     echo=True,
-    future=True,
+    pool_pre_ping=True,
 )
 
 AsyncSessionLocal = sessionmaker(
@@ -29,10 +42,8 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
-Base = declarative_base()
-
 # ---------------------------------------------------------
-# GET DB
+# DEPENDENCY
 # ---------------------------------------------------------
 async def get_db():
     async with AsyncSessionLocal() as session:

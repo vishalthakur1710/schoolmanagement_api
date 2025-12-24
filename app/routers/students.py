@@ -4,7 +4,7 @@ from typing import List
 
 from app import crud, schemas, model
 from app.database import get_db
-from app.router.auth import student_required
+from app.routers.auth import student_required
 
 router = APIRouter(prefix="/students", tags=["Students"])
 

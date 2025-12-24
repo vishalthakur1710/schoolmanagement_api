@@ -4,7 +4,7 @@ from typing import List
 
 from app import crud, schemas, model
 from app.database import get_db
-from app.router.auth import admin_required
+from app.routers.auth import admin_required
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 

@@ -1,0 +1,9 @@
+.venv
+__pycache__
+.git
+.gitignore
+.env
+poetry.lock
+node_modules
+dist
+build

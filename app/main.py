@@ -1,15 +1,14 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import SQLAlchemyError
-from app.database import engine, get_db
-from app.model import Base
-from app.router import auth, admin, students, teachers, notifications
+from sqlalchemy.exc import OperationalError
 
-import asyncio
+from app.database import engine
+from app.model import Base
+from app.routers import auth, admin, students, teachers, notifications
 
 # =========================================================
-# APP INIT
+# APP INIT (ONLY ONCE)
 # =========================================================
 app = FastAPI(
     title="School Management API",
@@ -18,50 +17,57 @@ app = FastAPI(
 )
 
 # =========================================================
-# CORS (if needed)
+# CORS
 # =========================================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update in production
+    allow_origins=["*"],  # tighten in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # =========================================================
-# INCLUDE ROUTERS
+# ROUTERS
 # =========================================================
-app.include_router(auth.router)
-app.include_router(admin.router)
-app.include_router(students.router)
-app.include_router(teachers.router)
-app.include_router(notifications.router)
-
+app.include_router(auth.router, prefix="/auth", tags=["Auth"])
+app.include_router(admin.router, prefix="/admin", tags=["Admin"])
+app.include_router(students.router, prefix="/students", tags=["Students"])
+app.include_router(teachers.router, prefix="/teachers", tags=["Teachers"])
+app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 
 # =========================================================
-# STARTUP EVENT: CREATE ALL TABLES
+# STARTUP: WAIT FOR DB + CREATE TABLES
 # =========================================================
 @app.on_event("startup")
 async def startup():
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        print("Database tables created")
-    except SQLAlchemyError as e:
-        print(f"❌ Database startup error: {e}")
+    max_retries = 20
+    delay = 2  # seconds
 
+    for attempt in range(1, max_retries + 1):
+        try:
+            async with engine.begin() as conn:
+                # DEV ONLY (remove in prod, use Alembic)
+                await conn.run_sync(Base.metadata.create_all)
+
+                print("✅ Database connected & tables ready")
+                return
+        except OperationalError:
+            print(f"⏳ Database not ready (attempt {attempt}/{max_retries})")
+            await asyncio.sleep(delay)
+
+    raise RuntimeError("❌ Database never became available")
 
 # =========================================================
-# SHUTDOWN EVENT
+# SHUTDOWN
 # =========================================================
 @app.on_event("shutdown")
 async def shutdown():
     await engine.dispose()
-    print(" Database connection closed")
-
+    print("🔌 Database connection closed")
 
 # =========================================================
-# SIMPLE ROOT ENDPOINT
+# ROOT
 # =========================================================
 @app.get("/")
 async def root():

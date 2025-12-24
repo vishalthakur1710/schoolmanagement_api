@@ -1,0 +1,21 @@
+services:
+  api:
+    image: school_app
+    container_name: school_api
+    ports:
+      - "10000:10000"
+    env_file:
+      - .env.docker
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: school_db
+    env_file:
+      - .env.docker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
