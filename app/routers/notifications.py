@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
-from sqlalchemy.future import select
+from sqlalchemy import select
 
 from app import crud, schemas, model
 from app.database import get_db

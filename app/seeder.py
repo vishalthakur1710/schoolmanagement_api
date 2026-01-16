@@ -1,6 +1,6 @@
 
 import asyncio
-from sqlalchemy.future import select
+from sqlalchemy import select
 
 from app.database import engine, AsyncSessionLocal, Base
 from app import crud, schemas, models
