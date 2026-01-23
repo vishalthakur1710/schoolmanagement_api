@@ -1,21 +1,29 @@
 services:
   api:
-    image: school_app
+    build: .
     container_name: school_api
-    ports:
-      - "10000:10000"
     env_file:
       - .env.docker
+    ports:
+      - "10000:10000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:15
     container_name: school_db
-    env_file:
-      - .env.docker
+    environment:
+      POSTGRES_DB: schooldb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d schooldb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
